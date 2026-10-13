@@ -32,3 +32,4 @@ Thumbs.db
 # Temporary outputs / uploads
 uploads/
 *.log
+TRACENET/
