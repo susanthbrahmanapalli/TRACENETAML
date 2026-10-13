@@ -134,6 +134,8 @@ class CaseUpdate(BaseModel):
     priority: Optional[str] = None
     assigned_analyst: Optional[str] = None
     resolution_rationale: Optional[str] = None
+    link_alert_ids: Optional[list[str]] = None
+    unlink_alert_ids: Optional[list[str]] = None
 
 class CaseRead(BaseModel):
     model_config = ConfigDict(from_attributes=True)

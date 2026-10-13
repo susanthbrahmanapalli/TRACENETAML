@@ -164,44 +164,45 @@ class GraphIntelligenceEngine:
             simple_G.add_edge(u, v)
 
         detected_cycles = []
+        MAX_DETECTED_CYCLES = 50
         try:
-            raw_cycles = list(nx.simple_cycles(simple_G))
+            for cycle in nx.simple_cycles(simple_G):
+                if 3 <= len(cycle) <= max_len:
+                    # Trace cycle transactions
+                    cycle_tids = []
+                    total_amt = 0.0
+                    timestamps = []
+                    
+                    # Check cycle edges
+                    for i in range(len(cycle)):
+                        u = cycle[i]
+                        v = cycle[(i + 1) % len(cycle)]
+                        if G.has_edge(u, v):
+                            # take highest transfer edge between u and v
+                            edge_data = list(G.get_edge_data(u, v).values())[0]
+                            cycle_tids.append(edge_data.get("transaction_id", ""))
+                            total_amt += edge_data.get("amount", 0.0)
+                            ts = edge_data.get("timestamp")
+                            if ts:
+                                timestamps.append(ts)
+
+                    duration_hours = 0.0
+                    if len(timestamps) >= 2:
+                        min_t = min(timestamps)
+                        max_t = max(timestamps)
+                        duration_hours = (max_t - min_t).total_seconds() / 3600.0
+
+                    detected_cycles.append(CyclePath(
+                        path=[str(node) for node in cycle + [cycle[0]]],
+                        length=len(cycle),
+                        total_amount=round(total_amt, 2),
+                        duration_hours=round(duration_hours, 2),
+                        transaction_ids=[str(tid) for tid in cycle_tids]
+                    ))
+                    if len(detected_cycles) >= MAX_DETECTED_CYCLES:
+                        break
         except Exception:
-            return []
-
-        for cycle in raw_cycles:
-            if 3 <= len(cycle) <= max_len:
-                # Trace cycle transactions
-                cycle_tids = []
-                total_amt = 0.0
-                timestamps = []
-                
-                # Check cycle edges
-                for i in range(len(cycle)):
-                    u = cycle[i]
-                    v = cycle[(i + 1) % len(cycle)]
-                    if G.has_edge(u, v):
-                        # take highest transfer edge between u and v
-                        edge_data = list(G.get_edge_data(u, v).values())[0]
-                        cycle_tids.append(edge_data.get("transaction_id", ""))
-                        total_amt += edge_data.get("amount", 0.0)
-                        ts = edge_data.get("timestamp")
-                        if ts:
-                            timestamps.append(ts)
-
-                duration_hours = 0.0
-                if len(timestamps) >= 2:
-                    min_t = min(timestamps)
-                    max_t = max(timestamps)
-                    duration_hours = (max_t - min_t).total_seconds() / 3600.0
-
-                detected_cycles.append(CyclePath(
-                    path=cycle + [cycle[0]],
-                    length=len(cycle),
-                    total_amount=round(total_amt, 2),
-                    duration_hours=round(duration_hours, 2),
-                    transaction_ids=cycle_tids
-                ))
+            return detected_cycles
         return detected_cycles
 
     def check_circular_path_for_account(self, account_id: str, max_hops: int = 5) -> list[dict]:

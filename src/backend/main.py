@@ -151,8 +151,32 @@ def login(req: LoginRequest, db: Session = Depends(get_db)):
 # -------------------------------------------------------------
 @app.post(f"{settings.API_PREFIX}/transactions/import", response_model=TransactionImportReport)
 async def import_transactions_csv(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    MAX_SIZE = 10 * 1024 * 1024 # 10MB
     content = await file.read()
+    if len(content) > MAX_SIZE:
+        raise HTTPException(status_code=413, detail="File payload exceeds 10MB upload limit.")
     return ingestion_service.parse_and_import_csv(content, db, current_user="analyst_priya")
+
+@app.post(f"{settings.API_PREFIX}/risk/assess", response_model=dict)
+def assess_transaction_risk(payload: dict, db: Session = Depends(get_db)):
+    txn_id = payload.get("transaction_id")
+    if not txn_id:
+        raise HTTPException(status_code=400, detail="Missing required field 'transaction_id'")
+    txn = db.query(Transaction).filter(Transaction.transaction_id == txn_id).first()
+    if not txn:
+        raise HTTPException(status_code=404, detail=f"Transaction '{txn_id}' not found")
+    asm, al = risk_engine.assess_transaction(txn, db, graph_engine)
+    return {
+        "assessment_id": asm.assessment_id,
+        "transaction_id": asm.transaction_id,
+        "account_id": asm.account_id,
+        "score": asm.score,
+        "risk_priority": asm.risk_priority,
+        "triggered_rules": json.loads(asm.triggered_rules),
+        "evidence": json.loads(asm.evidence_data),
+        "alert_created": al is not None,
+        "evaluated_at": asm.evaluated_at.isoformat()
+    }
 
 @app.get(f"{settings.API_PREFIX}/transactions")
 def list_transactions(

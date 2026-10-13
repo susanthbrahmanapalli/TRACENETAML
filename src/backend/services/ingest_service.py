@@ -41,7 +41,35 @@ class IngestionService:
         """
         Parse CSV content, validate rows, check idempotency, and ingest.
         """
-        df = pd.read_csv(io.BytesIO(file_content))
+        if not file_content or len(file_content.strip()) == 0:
+            return TransactionImportReport(
+                total_processed=0,
+                accepted=0,
+                rejected=1,
+                duplicates=0,
+                rejection_details=[{"row": 0, "reason": "Empty CSV file provided"}]
+            )
+
+        try:
+            df = pd.read_csv(io.BytesIO(file_content))
+        except Exception as e:
+            return TransactionImportReport(
+                total_processed=0,
+                accepted=0,
+                rejected=1,
+                duplicates=0,
+                rejection_details=[{"row": 0, "reason": f"Malformed CSV content: {str(e)}"}]
+            )
+
+        if df.empty:
+            return TransactionImportReport(
+                total_processed=0,
+                accepted=0,
+                rejected=1,
+                duplicates=0,
+                rejection_details=[{"row": 0, "reason": "CSV contains no data rows"}]
+            )
+
         # Rename columns based on aliases
         df.rename(columns={c: self.normalize_column_name(c) for c in df.columns}, inplace=True)
         
@@ -52,6 +80,9 @@ class IngestionService:
             duplicates=0,
             rejection_details=[]
         )
+
+        VALID_STATUSES = {"COMPLETED", "FAILED", "PENDING", "REVERSED"}
+        VALID_CHANNELS = {"UPI", "IMPS", "NEFT", "RTGS", "CARD", "ATM"}
 
         for idx, row in df.iterrows():
             row_num = idx + 2 # 1-based + header
@@ -66,6 +97,14 @@ class IngestionService:
                 report.rejection_details.append({
                     "row": row_num,
                     "reason": "Missing required fields (transaction_id, sender_account_id, or receiver_account_id)"
+                })
+                continue
+
+            if sender == receiver:
+                report.rejected += 1
+                report.rejection_details.append({
+                    "row": row_num,
+                    "reason": "Self-transfers not permitted (sender and receiver account cannot be identical)"
                 })
                 continue
 
@@ -91,7 +130,7 @@ class IngestionService:
                 if pd.isna(raw_time):
                     ts = datetime.now(timezone.utc)
                 elif isinstance(raw_time, datetime):
-                    ts = raw_time
+                    ts = raw_time if raw_time.tzinfo else raw_time.replace(tzinfo=timezone.utc)
                 else:
                     ts = date_parser.parse(str(raw_time))
                     if ts.tzinfo is None:
@@ -101,13 +140,30 @@ class IngestionService:
                 report.rejection_details.append({"row": row_num, "reason": f"Invalid timestamp format: {str(e)}"})
                 continue
 
-            # 5. Currency & Channel normalization
+            # 5. Currency & Channel normalization & validation
             curr = str(row.get("currency", "INR")).strip().upper()
             if not curr:
                 curr = "INR"
+
             channel = str(row.get("channel", "UPI")).strip().upper()
-            tx_type = str(row.get("transaction_type", "TRANSFER")).strip().upper()
+            if channel not in VALID_CHANNELS:
+                report.rejected += 1
+                report.rejection_details.append({
+                    "row": row_num,
+                    "reason": f"Unsupported payment channel '{channel}'. Allowed: {sorted(list(VALID_CHANNELS))}"
+                })
+                continue
+
             status = str(row.get("status", "COMPLETED")).strip().upper()
+            if status not in VALID_STATUSES:
+                report.rejected += 1
+                report.rejection_details.append({
+                    "row": row_num,
+                    "reason": f"Unsupported transaction status '{status}'. Allowed: {sorted(list(VALID_STATUSES))}"
+                })
+                continue
+
+            tx_type = str(row.get("transaction_type", "TRANSFER")).strip().upper()
             desc = str(row.get("description", "")) if pd.notna(row.get("description")) else None
             label = str(row.get("ground_truth_label", "BENIGN")) if pd.notna(row.get("ground_truth_label")) else "BENIGN"
             scenario = str(row.get("scenario_id", "CUSTOM_IMPORT")) if pd.notna(row.get("scenario_id")) else "CUSTOM_IMPORT"

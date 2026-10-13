@@ -16,6 +16,13 @@ from src.backend.schemas import RuleEvidenceItem
 from src.backend.graph_engine import graph_engine, GraphIntelligenceEngine
 from src.backend.config import settings
 
+def ensure_utc(dt: datetime | None) -> datetime:
+    if dt is None:
+        return datetime.now(timezone.utc)
+    if dt.tzinfo is None:
+        return dt.replace(tzinfo=timezone.utc)
+    return dt
+
 class RiskEngine:
     def __init__(self, ruleset_version: str = "1.0.0"):
         self.ruleset_version = ruleset_version
@@ -30,7 +37,7 @@ class RiskEngine:
         triggered_items: list[RuleEvidenceItem] = []
         sender_id = txn.sender_account_id
         receiver_id = txn.receiver_account_id
-        txn_time = txn.timestamp
+        txn_time = ensure_utc(txn.timestamp)
 
         # -------------------------------------------------------------
         # Rule 1: R01_VELOCITY_SPIKE
@@ -199,7 +206,8 @@ class RiskEngine:
         ).order_by(Transaction.timestamp.desc()).first()
         
         if last_txn:
-            days_inactive = (txn_time - last_txn.timestamp).total_seconds() / 86400.0
+            last_ts = ensure_utc(last_txn.timestamp)
+            days_inactive = (txn_time - last_ts).total_seconds() / 86400.0
             if days_inactive > 90.0 and txn.amount >= 250000.0:
                 triggered_items.append(RuleEvidenceItem(
                     rule_id="R07_DORMANT_SPIKE",
@@ -208,7 +216,7 @@ class RiskEngine:
                     description=f"Account dormant for {int(days_inactive)} days suddenly transferred ₹{txn.amount:,.2f}.",
                     evidence={
                         "days_inactive": round(days_inactive, 1),
-                        "last_active_date": last_txn.timestamp.isoformat(),
+                        "last_active_date": last_ts.isoformat(),
                         "amount_inr": txn.amount,
                         "threshold_days": 90.0
                     }

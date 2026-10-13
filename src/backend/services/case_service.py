@@ -109,8 +109,15 @@ class CaseService:
                 )
             case.status = new_status
             
-            # If closing, update linked alerts
+            # If closing, enforce mandatory resolution rationale
             if new_status in ("CLOSED_RESOLVED", "CLOSED_FALSE_POSITIVE"):
+                rationale = (case_update.resolution_rationale or case.resolution_rationale or "").strip()
+                if not rationale:
+                    raise HTTPException(
+                        status_code=400,
+                        detail="A non-empty resolution rationale is mandatory when closing a case."
+                    )
+                case.resolution_rationale = rationale
                 alerts = db.query(Alert).filter(Alert.case_id == case_id).all()
                 for al in alerts:
                     al.status = "RESOLVED" if new_status == "CLOSED_RESOLVED" else "DISMISSED"
@@ -122,7 +129,24 @@ class CaseService:
             case.assigned_analyst = case_update.assigned_analyst
 
         if case_update.resolution_rationale:
-            case.resolution_rationale = case_update.resolution_rationale
+            case.resolution_rationale = case_update.resolution_rationale.strip()
+
+        # Link alerts
+        if case_update.link_alert_ids:
+            alerts_to_link = db.query(Alert).filter(Alert.alert_id.in_(case_update.link_alert_ids)).all()
+            for al in alerts_to_link:
+                al.case_id = case_id
+                al.status = "INVESTIGATING"
+
+        # Unlink alerts
+        if case_update.unlink_alert_ids:
+            alerts_to_unlink = db.query(Alert).filter(
+                Alert.alert_id.in_(case_update.unlink_alert_ids),
+                Alert.case_id == case_id
+            ).all()
+            for al in alerts_to_unlink:
+                al.case_id = None
+                al.status = "OPEN"
 
         case.updated_at = datetime.now(timezone.utc)
 
@@ -130,7 +154,8 @@ class CaseService:
             "status": case.status,
             "priority": case.priority,
             "assigned_analyst": case.assigned_analyst,
-            "resolution_rationale": case.resolution_rationale
+            "resolution_rationale": case.resolution_rationale,
+            "linked_alerts_count": len(case.alerts)
         }
 
         # Audit log
