@@ -1,0 +1,14 @@
+services:
+  - type: web
+    name: tracenet-aml
+    env: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    healthCheckPath: /api/v1/health
+    envVars:
+      - key: APP_NAME
+        value: TraceNet
+      - key: DEFAULT_CURRENCY
+        value: INR
+      - key: CURRENCY_SYMBOL
+        value: ₹

@@ -13,6 +13,7 @@ from pathlib import Path
 from fastapi import FastAPI, Depends, HTTPException, Query, UploadFile, File, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, func
 
@@ -581,3 +582,26 @@ def simulate_stream_step(db: Session = Depends(get_db)):
         "priority": asm.risk_priority,
         "alert_triggered": al is not None
     }
+
+# -------------------------------------------------------------
+# 10. Frontend Single-Page Application (SPA) Serving
+# -------------------------------------------------------------
+frontend_dist_dir = Path("src/frontend/dist")
+if frontend_dist_dir.exists():
+    assets_dir = frontend_dist_dir / "assets"
+    if assets_dir.exists():
+        app.mount("/assets", StaticFiles(directory=assets_dir), name="frontend_assets")
+
+    @app.get("/{full_path:path}", include_in_schema=False)
+    async def serve_spa_page(full_path: str):
+        # Don't intercept API or docs routes
+        if full_path.startswith("api/") or full_path in ("docs", "redoc", "openapi.json"):
+            raise HTTPException(status_code=404, detail="Not Found")
+        
+        target = frontend_dist_dir / full_path
+        if full_path and target.is_file():
+            return FileResponse(target)
+        index_file = frontend_dist_dir / "index.html"
+        if index_file.exists():
+            return FileResponse(index_file)
+        raise HTTPException(status_code=404, detail="Frontend assets not compiled")

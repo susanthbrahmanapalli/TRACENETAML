@@ -1,0 +1,23 @@
+version: '3.8'
+
+services:
+  tracenet:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: tracenet:latest
+    container_name: tracenet-app
+    ports:
+      - "8000:8000"
+    environment:
+      - PORT=8000
+      - HOST=0.0.0.0
+      - APP_NAME=TraceNet
+      - DEFAULT_CURRENCY=INR
+      - CURRENCY_SYMBOL=₹
+    volumes:
+      - tracenet-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  tracenet-data:

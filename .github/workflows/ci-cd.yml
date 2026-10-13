@@ -1,0 +1,52 @@
+name: TraceNet CI/CD & Build Verification
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+          cache: 'pip'
+
+      - name: Set up Node.js 18
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install Python dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Seed test database & generate demo records
+        run: |
+          python -m src.backend.data_generator
+
+      - name: Run Pytest Automated Verification (25 tests)
+        run: |
+          pytest tests/ -v
+
+      - name: Install Frontend Dependencies & Build SPA
+        run: |
+          cd src/frontend
+          npm install
+          npm run build
+          cd ../..
+
+      - name: Verify Unified Production Artifacts
+        run: |
+          test -f src/frontend/dist/index.html || exit 1
+          test -f src/frontend/dist/hero.html || exit 1
+          echo "All TraceNet deployment verification checks passed!"
