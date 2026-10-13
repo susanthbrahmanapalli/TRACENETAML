@@ -1,5 +1,5 @@
-import React, { useEffect, useRef } from 'react';
-import { ArrowRight, ShieldCheck, PlayCircle } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
+import { ArrowRight, ShieldCheck, PlayCircle, X, Upload, ExternalLink, Film } from 'lucide-react';
 
 interface WebsiteHeroProps {
   onEnterPlatform?: () => void;
@@ -11,6 +11,12 @@ export const WebsiteHero: React.FC<WebsiteHeroProps> = ({
   showNavAction = true
 }) => {
   const stageRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [showVideoModal, setShowVideoModal] = useState(false);
+  const [videoSrc, setVideoSrc] = useState<string>('/demo-video.mp4');
+  const [videoUrlInput, setVideoUrlInput] = useState<string>('');
+  const [selectedFileName, setSelectedFileName] = useState<string | null>(null);
 
   useEffect(() => {
     const fit = () => {
@@ -23,6 +29,41 @@ export const WebsiteHero: React.FC<WebsiteHeroProps> = ({
     window.addEventListener('resize', fit);
     return () => window.removeEventListener('resize', fit);
   }, []);
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const url = URL.createObjectURL(file);
+      setVideoSrc(url);
+      setSelectedFileName(file.name);
+      setShowVideoModal(true);
+    }
+  };
+
+  const handleApplyUrl = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (videoUrlInput.trim()) {
+      setVideoSrc(videoUrlInput.trim());
+      setSelectedFileName(videoUrlInput.trim());
+      setShowVideoModal(true);
+    }
+  };
+
+  const isEmbedUrl = (url: string) => {
+    return url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com') || url.includes('loom.com');
+  };
+
+  const getEmbedUrl = (url: string) => {
+    if (url.includes('youtube.com/watch?v=')) {
+      const id = url.split('v=')[1]?.split('&')[0];
+      return `https://www.youtube.com/embed/${id}?autoplay=1`;
+    }
+    if (url.includes('youtu.be/')) {
+      const id = url.split('youtu.be/')[1]?.split('?')[0];
+      return `https://www.youtube.com/embed/${id}?autoplay=1`;
+    }
+    return url;
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-white overflow-hidden z-20 font-['Sora',sans-serif]">
@@ -67,14 +108,14 @@ export const WebsiteHero: React.FC<WebsiteHeroProps> = ({
           top: 56px;
           display: flex;
           align-items: center;
-          gap: 16px;
+          gap: 14px;
           z-index: 10;
         }
 
         .hero-txt {
           position: absolute;
           left: 90px;
-          top: 220px;
+          top: 210px;
           width: 600px;
         }
 
@@ -117,7 +158,7 @@ export const WebsiteHero: React.FC<WebsiteHeroProps> = ({
           top: 245px;
           display: flex;
           align-items: center;
-          gap: 16px;
+          gap: 14px;
           animation: hero-hb 6s ease-out infinite both;
         }
 
@@ -238,6 +279,15 @@ export const WebsiteHero: React.FC<WebsiteHeroProps> = ({
         }
       `}</style>
 
+      {/* Hidden File Input for connecting user's video */}
+      <input
+        type="file"
+        ref={fileInputRef}
+        onChange={handleFileChange}
+        accept="video/mp4,video/webm,video/ogg,video/quicktime"
+        className="hidden"
+      />
+
       <div
         id="stage"
         ref={stageRef}
@@ -259,9 +309,17 @@ export const WebsiteHero: React.FC<WebsiteHeroProps> = ({
           <span>TraceNet</span>
         </div>
 
-        {/* Top Navigation CTA */}
-        {showNavAction && onEnterPlatform && (
-          <div className="hero-nav">
+        {/* Top Navigation Bar */}
+        <div className="hero-nav">
+          <button
+            onClick={() => setShowVideoModal(true)}
+            className="inline-flex items-center space-x-2 px-4 py-2.5 rounded-full bg-white hover:bg-slate-50 text-slate-800 font-semibold text-sm border border-slate-200 shadow-sm transition-all hover:scale-105 active:scale-95 cursor-pointer"
+          >
+            <PlayCircle className="w-4 h-4 text-emerald-600" />
+            <span>Play Connected Video</span>
+          </button>
+
+          {showNavAction && onEnterPlatform && (
             <button
               onClick={onEnterPlatform}
               className="inline-flex items-center space-x-2 px-5 py-2.5 rounded-full bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm shadow-md shadow-emerald-500/25 transition-all transform hover:scale-105 active:scale-95 cursor-pointer"
@@ -270,8 +328,8 @@ export const WebsiteHero: React.FC<WebsiteHeroProps> = ({
               <span>Access Compliance Portal</span>
               <ArrowRight className="w-4 h-4 ml-1" />
             </button>
-          </div>
-        )}
+          )}
+        </div>
 
         {/* Dynamic Headings */}
         <div className="hero-txt">
@@ -279,21 +337,34 @@ export const WebsiteHero: React.FC<WebsiteHeroProps> = ({
           <h1 className="hero-h" id="hero-heading-b">Spot laundering loops live.</h1>
           <p className="hero-sub">Real-time fraud and AML detection for UPI, IMPS, NEFT and RTGS.</p>
 
-          {onEnterPlatform && (
-            <div className="hero-actions">
+          <div className="hero-actions">
+            {onEnterPlatform && (
               <button
                 onClick={onEnterPlatform}
-                className="inline-flex items-center space-x-2 px-6 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-base shadow-lg shadow-emerald-500/30 transition-all cursor-pointer"
+                className="inline-flex items-center space-x-2 px-5 py-3 rounded-xl bg-emerald-500 hover:bg-emerald-600 text-white font-semibold text-sm shadow-lg shadow-emerald-500/30 transition-all cursor-pointer"
               >
                 <span>Launch Platform</span>
                 <ArrowRight className="w-4 h-4" />
               </button>
-              <span className="text-xs text-emerald-800/80 font-medium bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-lg flex items-center gap-1.5">
-                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-                Live Indian Rails Orchestration
-              </span>
-            </div>
-          )}
+            )}
+
+            <button
+              onClick={() => setShowVideoModal(true)}
+              className="inline-flex items-center space-x-2 px-5 py-3 rounded-xl bg-white hover:bg-slate-50 text-slate-800 font-semibold text-sm border border-slate-300 shadow-sm transition-all cursor-pointer"
+            >
+              <PlayCircle className="w-4 h-4 text-emerald-600" />
+              <span>Watch Video Demo</span>
+            </button>
+
+            <button
+              onClick={() => fileInputRef.current?.click()}
+              className="inline-flex items-center space-x-1.5 px-3 py-3 rounded-xl bg-emerald-50 hover:bg-emerald-100 text-emerald-800 font-semibold text-xs border border-emerald-200 transition-all cursor-pointer"
+              title="Connect custom video file from disk"
+            >
+              <Upload className="w-3.5 h-3.5 text-emerald-600" />
+              <span>Connect Video</span>
+            </button>
+          </div>
         </div>
 
         {/* Real-time Animated Graph SVG */}
@@ -443,6 +514,87 @@ export const WebsiteHero: React.FC<WebsiteHeroProps> = ({
           <span>Circular transfer flagged</span>
         </div>
       </div>
+
+      {/* Connected Video Modal Overlay */}
+      {showVideoModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/80 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl border border-slate-200 w-full max-w-4xl overflow-hidden animate-in fade-in zoom-in-95 duration-200">
+            {/* Modal Header */}
+            <div className="px-6 py-4 bg-slate-50 border-b border-slate-200 flex items-center justify-between">
+              <div className="flex items-center space-x-2.5">
+                <Film className="w-5 h-5 text-emerald-600" />
+                <h3 className="font-bold text-slate-800 text-base">TraceNet Connected Video Walkthrough</h3>
+                {selectedFileName && (
+                  <span className="text-xs bg-emerald-100 text-emerald-800 px-2 py-0.5 rounded-full font-mono">
+                    {selectedFileName}
+                  </span>
+                )}
+              </div>
+              <button
+                onClick={() => setShowVideoModal(false)}
+                className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-200 rounded-lg transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Video Viewport */}
+            <div className="relative bg-black aspect-video flex items-center justify-center">
+              {isEmbedUrl(videoSrc) ? (
+                <iframe
+                  src={getEmbedUrl(videoSrc)}
+                  className="w-full h-full border-0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              ) : (
+                <video
+                  key={videoSrc}
+                  controls
+                  autoPlay
+                  className="w-full h-full object-contain"
+                  onError={() => {
+                    // Fallback poster when default video is not yet placed
+                  }}
+                >
+                  <source src={videoSrc} type="video/mp4" />
+                  Your browser does not support HTML5 video.
+                </video>
+              )}
+            </div>
+
+            {/* Video Connection Toolbar */}
+            <div className="p-4 bg-slate-50 border-t border-slate-200 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-center space-x-2">
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="inline-flex items-center space-x-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold rounded-lg shadow-sm transition-all cursor-pointer"
+                >
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Choose Video File from Computer</span>
+                </button>
+              </div>
+
+              <form onSubmit={handleApplyUrl} className="flex items-center space-x-2 flex-1 max-w-md">
+                <input
+                  type="text"
+                  value={videoUrlInput}
+                  onChange={(e) => setVideoUrlInput(e.target.value)}
+                  placeholder="Paste YouTube, Loom, or MP4 URL..."
+                  className="flex-1 px-3 py-2 text-xs bg-white border border-slate-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500"
+                />
+                <button
+                  type="submit"
+                  className="px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white text-xs font-semibold rounded-lg transition-colors cursor-pointer"
+                >
+                  Connect URL
+                </button>
+              </form>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
