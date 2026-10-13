@@ -1,0 +1,29 @@
+{
+  "name": "tracenet",
+  "version": "1.0.0",
+  "private": true,
+  "description": "TraceNet: Real-Time Fraud & AML Risk Orchestration Platform",
+  "scripts": {
+    "dev:backend": "powershell -Command \".\\venv\\Scripts\\uvicorn src.backend.main:app --reload --port 8000\"",
+    "dev:frontend": "npm.cmd --prefix src/frontend run dev",
+    "build:frontend": "npm.cmd --prefix src/frontend run build",
+    "test:backend": "powershell -Command \".\\venv\\Scripts\\pytest tests/ -v\"",
+    "test:frontend": "npm.cmd --prefix src/frontend run test",
+    "seed:demo": "powershell -Command \".\\venv\\Scripts\\python -m src.backend.data_generator\""
+  },
+  "keywords": [
+    "aml",
+    "fraud-detection",
+    "risk-orchestration",
+    "graph-analytics",
+    "fintech"
+  ],
+  "author": "TraceNet Core Team",
+  "license": "Apache-2.0",
+  "main": "index.js",
+  "directories": {
+    "doc": "docs",
+    "test": "tests"
+  },
+  "type": "commonjs"
+}
