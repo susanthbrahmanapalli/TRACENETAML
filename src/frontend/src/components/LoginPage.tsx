@@ -5,9 +5,10 @@ import { api } from '../api/client';
 
 interface LoginPageProps {
   onLoginSuccess: (user: User) => void;
+  onBackToShowcase?: () => void;
 }
 
-export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
+export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess, onBackToShowcase }) => {
   const [username, setUsername] = useState('analyst_priya');
   const [password, setPassword] = useState('demo123');
   const [role, setRole] = useState('ANALYST_L2');
@@ -44,7 +45,16 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-mint-50/70 via-white to-slate-50 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-gradient-to-br from-mint-50/70 via-white to-slate-50 flex flex-col items-center justify-center p-4">
+      {onBackToShowcase && (
+        <button
+          type="button"
+          onClick={onBackToShowcase}
+          className="mb-4 inline-flex items-center space-x-2 text-xs font-semibold text-mint-700 hover:text-mint-800 bg-white hover:bg-mint-50/50 px-4 py-2 rounded-full border border-mint-200 shadow-sm transition-all cursor-pointer"
+        >
+          <span>&larr; Back to Website Showcase (Hero Loop)</span>
+        </button>
+      )}
       <div className="w-full max-w-md bg-white rounded-2xl shadow-xl shadow-mint-900/5 border border-slate-200 overflow-hidden">
         {/* Header */}
         <div className="p-8 pb-6 text-center bg-gradient-to-b from-mint-50/40 to-transparent">

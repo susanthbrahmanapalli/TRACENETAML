@@ -100,3 +100,10 @@ def test_evaluation_run_endpoint():
     assert "confusion_matrix" in data
     assert data["accuracy"] > 0.5
     assert data["sample_size"] > 0
+
+def test_api_hero_endpoint():
+    res = client.get("/hero")
+    assert res.status_code == 200
+    assert "TraceNet" in res.text
+    assert "Circular transfer flagged" in res.text
+    assert "hero-loop" in res.text or "loop" in res.text

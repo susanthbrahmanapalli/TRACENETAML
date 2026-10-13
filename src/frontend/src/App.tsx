@@ -3,6 +3,7 @@ import { User, Alert, Transaction } from './types';
 import { Navbar } from './components/Navbar';
 import { Sidebar } from './components/Sidebar';
 import { LoginPage } from './components/LoginPage';
+import { WebsiteHero } from './components/WebsiteHero';
 import { OverviewView } from './views/OverviewView';
 import { TransactionsView } from './views/TransactionsView';
 import { GraphView } from './views/GraphView';
@@ -24,6 +25,7 @@ export function App() {
   const [openAlertsCount, setOpenAlertsCount] = useState<number>(0);
   const [openCasesCount, setOpenCasesCount] = useState<number>(0);
   const [isStreaming, setIsStreaming] = useState<boolean>(false);
+  const [showLoginForm, setShowLoginForm] = useState<boolean>(false);
 
   // Load telemetry counts
   const refreshBadgeCounts = async () => {
@@ -106,9 +108,22 @@ export function App() {
     }
   };
 
-  // If unauthenticated, show dedicated login page
+  // If unauthenticated, show Website Hero landing page with option to open Login
   if (!currentUser) {
-    return <LoginPage onLoginSuccess={handleLoginSuccess} />;
+    if (!showLoginForm) {
+      return (
+        <WebsiteHero
+          onEnterPlatform={() => setShowLoginForm(true)}
+          showNavAction={true}
+        />
+      );
+    }
+    return (
+      <LoginPage
+        onLoginSuccess={handleLoginSuccess}
+        onBackToShowcase={() => setShowLoginForm(false)}
+      />
+    );
   }
 
   return (
@@ -133,6 +148,20 @@ export function App() {
         />
 
         <main className="flex-1 overflow-y-auto bg-slate-50">
+          {currentTab === 'hero' && (
+            <div className="relative w-full h-[calc(100vh-4rem)] bg-white overflow-hidden">
+              <WebsiteHero onEnterPlatform={() => setCurrentTab('overview')} showNavAction={false} />
+              <div className="absolute top-4 right-6 z-30">
+                <button
+                  onClick={() => setCurrentTab('overview')}
+                  className="px-4 py-2 bg-slate-900/80 hover:bg-slate-900 text-white rounded-xl text-xs font-semibold backdrop-blur shadow-md transition-all cursor-pointer"
+                >
+                  &larr; Return to Operations Overview
+                </button>
+              </div>
+            </div>
+          )}
+
           {currentTab === 'overview' && (
             <OverviewView
               onViewTransaction={handleInspectTransaction}

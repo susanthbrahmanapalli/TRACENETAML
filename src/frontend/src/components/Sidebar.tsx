@@ -7,7 +7,8 @@ import {
   FolderGit2,
   Cpu,
   UploadCloud,
-  FileCheck2
+  FileCheck2,
+  PlayCircle
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -24,6 +25,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   openCasesCount
 }) => {
   const navItems = [
+    { id: 'hero', label: 'Website Hero Loop', icon: PlayCircle, badge: '6s LOOP' },
     { id: 'overview', label: 'Operations Overview', icon: LayoutDashboard },
     { id: 'transactions', label: 'Transaction Explorer', icon: ArrowRightLeft },
     { id: 'graph', label: 'Live Graph Intel', icon: Network, badge: 'LIVE' },

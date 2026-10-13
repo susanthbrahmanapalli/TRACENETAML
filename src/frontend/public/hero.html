@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>TraceNet website hero loop (6s)</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#0e2a1f;--mint:#2bb673;--mint-l:#e3f7ed;--mint-m:#bfead3;--red:#e0334c;--mute:#5f776b}
+html,body{height:100%;margin:0;background:#fff;overflow:hidden;font-family:Sora,system-ui,sans-serif;color:var(--ink)}
+#wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+#stage{width:1280px;height:720px;flex:none;position:relative;overflow:hidden;transform-origin:center;
+background:radial-gradient(900px 600px at 80% 55%,#e3f7ed 0%,#fff 70%);animation:loop 6s linear infinite}
+.brand{position:absolute;left:90px;top:56px;display:flex;align-items:center;gap:12px;font-weight:700;font-size:24px}
+.nav-action{position:absolute;right:90px;top:56px;display:flex;align-items:center;gap:12px}
+.portal-btn{display:inline-flex;align-items:center;gap:8px;background:#2bb673;color:#fff;text-decoration:none;padding:10px 20px;border-radius:999px;font-size:14px;font-weight:600;transition:background 0.2s;box-shadow:0 4px 14px rgba(43,182,115,0.3)}
+.portal-btn:hover{background:#239a60}
+.txt{position:absolute;left:90px;top:230px;width:600px}
+.h{margin:0;font-size:58px;line-height:1.12;font-weight:700;letter-spacing:-.02em;position:absolute;left:0;top:0;width:600px}
+#a{animation:ha 6s ease-out infinite both}
+#b{animation:hb 6s ease-out infinite both}
+.sub{position:absolute;left:0;top:160px;width:500px;margin:0;font-size:21px;line-height:1.5;color:#3d5a4c;animation:hb 6s ease-out infinite both}
+.cta-row{position:absolute;left:0;top:248px;display:flex;align-items:center;gap:16px;animation:hb 6s ease-out infinite both}
+.cta-primary{background:#2bb673;color:#fff;text-decoration:none;padding:12px 24px;border-radius:12px;font-size:15px;font-weight:600;display:inline-flex;align-items:center;gap:8px;box-shadow:0 4px 16px rgba(43,182,115,0.3)}
+.cta-primary:hover{background:#239a60}
+svg{position:absolute;left:0;top:0}
+text{font-family:Sora,system-ui,sans-serif}
+.e1{stroke-dasharray:1;animation:d1 6s ease-in-out infinite both}
+.e2{stroke-dasharray:1;animation:d2 6s ease-in-out infinite both}
+.e3{stroke-dasharray:1;animation:d3 6s ease-in-out infinite both}
+.nd{animation:nd 6s ease-out infinite both}
+.amt{animation:amt 6s linear infinite both}
+.rd{animation:amt 6s linear infinite both}
+.ring{transform-box:fill-box;transform-origin:center;animation:ring 6s ease-out infinite both}
+.badge{position:absolute;left:870px;top:610px;display:flex;align-items:center;gap:10px;background:#fff;border:1.5px solid var(--red);border-radius:999px;padding:10px 18px;font-size:15px;font-weight:600;animation:badge 6s ease-out infinite both}
+.badge i{width:10px;height:10px;border-radius:50%;background:var(--red)}
+@keyframes loop{0%{opacity:0}3%,95%{opacity:1}100%{opacity:0}}
+@keyframes ha{0%,4%{opacity:0;transform:translateY(14px)}12%,40%{opacity:1;transform:none}46%,100%{opacity:0;transform:translateY(-10px)}}
+@keyframes hb{0%,46%{opacity:0;transform:translateY(14px)}54%,92%{opacity:1;transform:none}97%,100%{opacity:0}}
+@keyframes d1{0%,38%{stroke-dashoffset:1}50%,100%{stroke-dashoffset:0}}
+@keyframes d2{0%,50%{stroke-dashoffset:1}62%,100%{stroke-dashoffset:0}}
+@keyframes d3{0%,62%{stroke-dashoffset:1}74%,100%{stroke-dashoffset:0}}
+@keyframes nd{0%,36%{stroke:#bfead3;fill:#e3f7ed}48%,100%{stroke:#e0334c;fill:#fff}}
+@keyframes amt{0%,66%{opacity:0}74%,100%{opacity:1}}
+@keyframes ring{0%,68%{opacity:0;transform:scale(.6)}78%,100%{opacity:1;transform:scale(1)}}
+@keyframes badge{0%,76%{opacity:0;transform:translateY(10px)}84%,100%{opacity:1;transform:none}}
+@media (prefers-reduced-motion:reduce){#stage,#stage *{animation:none!important}#a{opacity:0}}
+</style>
+</head>
+<body>
+<div id="wrap">
+<div id="stage" aria-label="TraceNet detects circular money laundering transfers in real time">
+  <div class="brand">
+    <svg width="34" height="34" viewBox="0 0 34 34" style="position:static"><g stroke="#2bb673" stroke-width="2.5" fill="none"><path d="M7 8L27 14L15 28Z"/></g><g fill="#2bb673"><circle cx="7" cy="8" r="4"/><circle cx="27" cy="14" r="4"/><circle cx="15" cy="28" r="4"/></g></svg>
+    TraceNet
+  </div>
+
+  <div class="nav-action">
+    <a href="/" class="portal-btn">Access Compliance Portal &rarr;</a>
+  </div>
+
+  <div class="txt">
+    <h1 class="h" id="a">Money moves in seconds.</h1>
+    <h1 class="h" id="b">Spot laundering loops live.</h1>
+    <p class="sub">Real-time fraud and AML detection for UPI, IMPS, NEFT and RTGS.</p>
+    <div class="cta-row">
+      <a href="/" class="cta-primary">Launch Platform &rarr;</a>
+    </div>
+  </div>
+
+  <svg width="1280" height="720" viewBox="0 0 1280 720">
+    <defs>
+      <marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#e0334c"/></marker>
+      <path id="p1" d="M700 330L840 200"/><path id="p2" d="M1000 120L1180 200"/>
+      <path id="p3" d="M1160 520L1100 330"/><path id="p4" d="M720 600L900 540"/>
+      <path id="p5" d="M700 330L900 540"/><path id="p6" d="M1000 120L840 200"/>
+    </defs>
+    <g stroke="#bfead3" stroke-width="2" fill="none">
+      <use href="#p1"/><use href="#p2"/><use href="#p3"/><use href="#p4"/><use href="#p5"/><use href="#p6"/>
+      <path d="M1180 200L1100 330"/>
+    </g>
+    <g fill="#2bb673">
+      <circle r="4.5"><animateMotion dur="3s" repeatCount="indefinite"><mpath href="#p1"/></animateMotion></circle>
+      <circle r="4.5"><animateMotion dur="3s" begin="-1s" repeatCount="indefinite"><mpath href="#p2"/></animateMotion></circle>
+      <circle r="4.5"><animateMotion dur="2s" begin="-.5s" repeatCount="indefinite"><mpath href="#p3"/></animateMotion></circle>
+      <circle r="4.5"><animateMotion dur="3s" begin="-2s" repeatCount="indefinite"><mpath href="#p4"/></animateMotion></circle>
+      <circle r="4.5"><animateMotion dur="2s" begin="-1.2s" repeatCount="indefinite"><mpath href="#p5"/></animateMotion></circle>
+      <circle r="4.5"><animateMotion dur="3s" begin="-.3s" repeatCount="indefinite"><mpath href="#p6"/></animateMotion></circle>
+    </g>
+    <g fill="#e3f7ed" stroke="#bfead3" stroke-width="2">
+      <circle cx="700" cy="330" r="18"/><circle cx="1000" cy="120" r="16"/><circle cx="1180" cy="200" r="16"/>
+      <circle cx="1160" cy="520" r="18"/><circle cx="720" cy="600" r="16"/><circle cx="1100" cy="330" r="1"/>
+    </g>
+    <g fill="none" stroke="#e0334c" stroke-width="4" stroke-linecap="round" marker-end="url(#ar)">
+      <path class="e1" pathLength="1" d="M861 211L1076 318"/>
+      <path class="e2" pathLength="1" d="M1085 346L915 524"/>
+      <path class="e3" pathLength="1" d="M896 518L844 222"/>
+    </g>
+    <g class="ring" fill="none" stroke="#e0334c" stroke-opacity=".3" stroke-width="7"><circle cx="840" cy="200" r="42"/></g>
+    <g class="ring" fill="none" stroke="#e0334c" stroke-opacity=".3" stroke-width="7"><circle cx="1100" cy="330" r="42"/></g>
+    <g class="ring" fill="none" stroke="#e0334c" stroke-opacity=".3" stroke-width="7"><circle cx="900" cy="540" r="42"/></g>
+    <g stroke-width="3.5">
+      <circle class="nd" cx="840" cy="200" r="24"/><circle class="nd" cx="1100" cy="330" r="24"/><circle class="nd" cx="900" cy="540" r="24"/>
+    </g>
+    <g class="rd" fill="#e0334c">
+      <circle r="6"><animateMotion dur="2s" repeatCount="indefinite" path="M840 200L1100 330L900 540Z"/></circle>
+    </g>
+    <g class="amt" font-size="15" font-weight="600" fill="#e0334c" text-anchor="middle" stroke="#fff" stroke-width="6" paint-order="stroke">
+      <text x="990" y="244">₹4,80,000</text><text x="1038" y="458">₹4,65,000</text><text x="800" y="388">₹4,50,000</text>
+    </g>
+  </svg>
+  <div class="badge"><i></i>Circular transfer flagged</div>
+</div>
+</div>
+<script>
+function fit(){var s=Math.min(innerWidth/1280,innerHeight/720);document.getElementById('stage').style.transform='scale('+s+')'}
+addEventListener('resize',fit);fit();
+</script>
+</body>
+</html>

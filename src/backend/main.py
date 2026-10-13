@@ -8,9 +8,11 @@ import json
 import uuid
 import random
 from typing import Optional
+from pathlib import Path
 
 from fastapi import FastAPI, Depends, HTTPException, Query, UploadFile, File, status
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
 from sqlalchemy.orm import Session
 from sqlalchemy import desc, func
 
@@ -77,6 +79,17 @@ def health_check():
         "currency_symbol": settings.CURRENCY_SYMBOL,
         "timestamp": datetime.now(timezone.utc).isoformat()
     }
+
+@app.get("/hero", response_class=FileResponse)
+@app.get("/hero.html", response_class=FileResponse)
+def get_hero_page():
+    """Serve the standalone 6s animated website hero loop."""
+    hero_path = Path("src/frontend/public/hero.html")
+    if not hero_path.exists():
+        hero_path = Path("src/frontend/dist/hero.html")
+    if not hero_path.exists():
+        raise HTTPException(status_code=404, detail="Hero showcase page not found")
+    return FileResponse(hero_path, media_type="text/html")
 
 @app.get(f"{settings.API_PREFIX}/stats/overview", response_model=OverviewStats)
 def get_overview_stats(db: Session = Depends(get_db)):
